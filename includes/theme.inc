@@ -164,7 +164,7 @@ function _init_theme($theme, $base_theme = array(), $registry_callback = '_theme
   // Initialize the theme.
   if (isset($theme->engine)) {
     // Include the engine.
-    include_once './'. $theme->owner;
+    include_once DRUPAL_ROOT . '/'. $theme->owner;
 
     $theme_engine = $theme->engine;
     if (function_exists($theme_engine .'_init')) {
@@ -179,12 +179,12 @@ function _init_theme($theme, $base_theme = array(), $registry_callback = '_theme
     foreach ($base_theme as $base) {
       // Include the theme file or the engine.
       if (!empty($base->owner)) {
-        include_once './'. $base->owner;
+        include_once DRUPAL_ROOT . '/'. $base->owner;
       }
     }
     // and our theme gets one too.
     if (!empty($theme->owner)) {
-      include_once './'. $theme->owner;
+      include_once DRUPAL_ROOT . '/'. $theme->owner;
     }
   }
 
@@ -300,13 +300,13 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
         // First, check to see if the fully qualified file exists.
         $filename = './'. $path .'/'. $info['file'];
         if (file_exists($filename)) {
-          require_once $filename;
+          require_once DRUPAL_ROOT . '/' . $filename;
           $result[$hook]['include files'][] = $filename;
         }
         else {
           $filename = './'. $info['file'];
           if (file_exists($filename)) {
-            require_once $filename;
+            require_once DRUPAL_ROOT . '/' . $filename;
             $result[$hook]['include files'][] = $filename;
           }
         }
@@ -314,7 +314,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       elseif (isset($info['file']) && isset($info['path'])) {
         $filename = './'. $info['path'] .'/'. $info['file'];
         if (file_exists($filename)) {
-          require_once $filename;
+          require_once DRUPAL_ROOT . '/' . $filename;
           $result[$hook]['include files'][] = $filename;
         }
       }
@@ -641,7 +641,7 @@ function theme() {
   // Include a file if the theme function or preprocess function is held elsewhere.
   if (!empty($info['include files'])) {
     foreach ($info['include files'] as $include_file) {
-      include_once($include_file);
+      include_once DRUPAL_ROOT . '/' . $include_file;
     }
   }
 
@@ -658,7 +658,7 @@ function theme() {
       // run unnecessary file_exists calls.
       $included_files[$include_file] = TRUE;
       if (file_exists('./'. $include_file)) {
-        include_once('./'. $include_file);
+        include_once DRUPAL_ROOT . '/' . $include_file;
       }
     }
   }
@@ -1075,7 +1075,7 @@ function theme_get_setting($setting_name, $refresh = FALSE) {
 function theme_render_template($template_file, $variables) {
   extract($variables, EXTR_SKIP);  // Extract the variables to a local namespace
   ob_start();                      // Start output buffering
-  include "./$template_file";      // Include the template file
+  include DRUPAL_ROOT . '/' . "$template_file";      // Include the template file
   $contents = ob_get_contents();   // Get the contents of the buffer
   ob_end_clean();                  // End buffering and discard
   return $contents;                // Return the contents

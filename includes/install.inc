@@ -153,7 +153,7 @@ function drupal_detect_database_types() {
 
   foreach (array('mysql', 'mysqli', 'pgsql') as $type) {
     if (file_exists('./includes/install.'. $type .'.inc')) {
-      include_once './includes/install.'. $type .'.inc';
+      include_once DRUPAL_ROOT . '/includes/install.'. $type .'.inc';
       $function = $type .'_is_available';
       if ($function()) {
         $databases[$type] = $type;
@@ -267,8 +267,8 @@ function drupal_get_install_files($module_list = array()) {
  *   The list of modules to install.
  */
 function drupal_verify_profile($profile, $locale) {
-  include_once './includes/file.inc';
-  include_once './includes/common.inc';
+  include_once DRUPAL_ROOT . '/includes/file.inc';
+  include_once DRUPAL_ROOT . '/includes/common.inc';
 
   $profile_file = "./profiles/$profile/$profile.profile";
 
@@ -276,7 +276,7 @@ function drupal_verify_profile($profile, $locale) {
     install_no_profile_error();
   }
 
-  require_once($profile_file);
+  require_once DRUPAL_ROOT . '/' . $profile_file;
 
   // Get a list of modules required by this profile.
   $function = $profile .'_profile_modules';
@@ -355,7 +355,7 @@ function _drupal_install_module($module) {
  */
 function drupal_install_system() {
   $system_path = dirname(drupal_get_filename('module', 'system', NULL));
-  require_once './'. $system_path .'/system.install';
+  require_once DRUPAL_ROOT . '/' . $system_path . '/system.install';
   module_invoke('system', 'install');
   $system_versions = drupal_get_schema_versions('system');
   $system_version = $system_versions ? max($system_versions) : SCHEMA_INSTALLED;
@@ -632,14 +632,14 @@ function st($string, $args = array()) {
     $locale_strings = array();
     $filename = './profiles/'. $profile .'/translations/'. $install_locale .'.po';
     if (file_exists($filename)) {
-      require_once './includes/locale.inc';
+      require_once DRUPAL_ROOT . '/includes/locale.inc';
       $file = (object) array('filepath' => $filename);
       _locale_import_read_po('mem-store', $file);
       $locale_strings = _locale_import_one_string('mem-report');
     }
   }
 
-  require_once './includes/theme.inc';
+  require_once DRUPAL_ROOT . '/includes/theme.inc';
   // Transform arguments before inserting them
   foreach ($args as $key => $value) {
     switch ($key[0]) {
@@ -666,7 +666,7 @@ function st($string, $args = array()) {
  *   Name of profile to check.
  */
 function drupal_check_profile($profile) {
-  include_once './includes/file.inc';
+  include_once DRUPAL_ROOT . '/includes/file.inc';
 
   $profile_file = "./profiles/$profile/$profile.profile";
 
@@ -674,7 +674,7 @@ function drupal_check_profile($profile) {
     install_no_profile_error();
   }
 
-  require_once($profile_file);
+  require_once DRUPAL_ROOT . '/' . $profile_file;
 
   // Get a list of modules required by this profile.
   $function = $profile .'_profile_modules';
@@ -686,7 +686,7 @@ function drupal_check_profile($profile) {
   // Collect requirement testing results
   $requirements = array();
   foreach ($installs as $install) {
-    require_once $install->filename;
+    require_once DRUPAL_ROOT . '/' . $install->filename;
     if (module_hook($install->name, 'requirements')) {
       $requirements = array_merge($requirements, module_invoke($install->name, 'requirements', 'install'));
     }
@@ -714,7 +714,7 @@ function drupal_check_module($module) {
   // Include install file
   $install = drupal_get_install_files(array($module));
   if (isset($install[$module])) {
-    require_once $install[$module]->filename;
+    require_once DRUPAL_ROOT . '/' . $install[$module]->filename;
 
     // Check requirements
     $requirements = module_invoke($module, 'requirements', 'install');

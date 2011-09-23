@@ -125,7 +125,7 @@ function db_set_active($name = 'default') {
   static $db_conns, $db_slave_conns, $active_name = FALSE;
 
   if (empty($db_url)) {
-    include_once 'includes/install.inc';
+    include_once DRUPAL_ROOT . '/includes/install.inc';
     install_goto('install.php');
   }
 
@@ -156,7 +156,7 @@ function db_set_active($name = 'default') {
     $handler = "./includes/database.$db_type.inc";
 
     if (is_file($handler)) {
-      include_once $handler;
+      include_once DRUPAL_ROOT . '/' . $handler;
     }
     else {
       _db_error_page("The database type '". $db_type ."' is unsupported. Please use either 'mysql' or 'mysqli' for MySQL, or 'pgsql' for PostgreSQL databases.");

@@ -1110,7 +1110,7 @@ class DrupalWebTestCase extends DrupalTestCase {
     ini_set('error_log', $directory . '/error.log');
 
 //    include_once DRUPAL_ROOT . '/includes/install.inc';
-    include_once './includes/install.inc';
+    include_once DRUPAL_ROOT . '/includes/install.inc';
     drupal_install_system();
 
 //    $this->preloadRegistry();

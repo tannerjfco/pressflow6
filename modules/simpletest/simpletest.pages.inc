@@ -189,7 +189,7 @@ function simpletest_test_form_submit($form, &$form_state) {
   foreach ($form_state['values'] as $class_name => $value) {
     // Drupal 6.
     if (isset($classes[$class_name]['file'])) {
-      require_once $classes[$class_name]['file'];
+      require_once DRUPAL_ROOT . '/' . $classes[$class_name]['file'];
     }
 
     if (class_exists($class_name) && $value === 1) {
@@ -247,7 +247,7 @@ function simpletest_result_form(&$form_state, $test_id) {
   $form['result']['results'] = array();
   $classes = simpletest_test_get_all_classes(); // Drupal 6.
   foreach ($results as $group => $assertions) {
-    require_once $classes[$group]['file']; // Drupal 6.
+    require_once DRUPAL_ROOT . '/' . $classes[$group]['file']; // Drupal 6.
 
     // Create group fieldset with summary information.
     $info = call_user_func(array($group, 'getInfo'));
