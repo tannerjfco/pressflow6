@@ -337,7 +337,7 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
   for ($i = count($uri) - 1; $i > 0; $i--) {
     for ($j = count($server); $j > 0; $j--) {
       $dir = implode('.', array_slice($server, -$j)) . implode('.', array_slice($uri, 0, $i));
-      if (file_exists("$confdir/$dir/settings.php") || (!$require_settings && file_exists("$confdir/$dir"))) {
+      if (file_exists(DRUPAL_ROOT . "/$confdir/$dir/settings.php") || (!$require_settings && file_exists(DRUPAL_ROOT . "/$confdir/$dir"))) {
         $conf = "$confdir/$dir";
         return $conf;
       }
@@ -403,7 +403,7 @@ function conf_init() {
     $_SERVER['HTTP_HOST'] = '';
   }
 
-  if (file_exists('./'. conf_path() .'/settings.php')) {
+  if (file_exists(DRUPAL_ROOT . '/'. conf_path() .'/settings.php')) {
     include_once DRUPAL_ROOT . '/'. conf_path() .'/settings.php';
   }
 
@@ -516,7 +516,7 @@ function drupal_get_filename($type, $name, $filename = NULL) {
     $files[$type] = array();
   }
 
-  if (!empty($filename) && file_exists($filename)) {
+  if (!empty($filename) && file_exists(DRUPAL_ROOT . '/'. $filename)) {
     $files[$type][$name] = $filename;
   }
   elseif (isset($files[$type][$name])) {
@@ -526,7 +526,7 @@ function drupal_get_filename($type, $name, $filename = NULL) {
   // the database.  This is required because this function is called both
   // before we have a database connection (i.e. during installation) and
   // when a database connection fails.
-  elseif (db_is_active() && (($file = db_result(db_query("SELECT filename FROM {system} WHERE name = '%s' AND type = '%s'", $name, $type))) && file_exists($file))) {
+  elseif (db_is_active() && (($file = db_result(db_query("SELECT filename FROM {system} WHERE name = '%s' AND type = '%s'", $name, $type))) && file_exists(DRUPAL_ROOT . '/'. $file))) {
     $files[$type][$name] = $file;
   }
   else {
@@ -537,7 +537,7 @@ function drupal_get_filename($type, $name, $filename = NULL) {
     $file = (($type == 'theme_engine') ? "$name.engine" : "$name.$type");
 
     foreach (array("$config/$dir/$file", "$config/$dir/$name/$file", "$dir/$file", "$dir/$name/$file") as $file) {
-      if (file_exists($file)) {
+      if (file_exists(DRUPAL_ROOT . '/'. $file)) {
         $files[$type][$name] = $file;
         break;
       }

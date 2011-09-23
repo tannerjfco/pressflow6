@@ -152,7 +152,7 @@ function drupal_detect_database_types() {
   $databases = array();
 
   foreach (array('mysql', 'mysqli', 'pgsql') as $type) {
-    if (file_exists('./includes/install.'. $type .'.inc')) {
+    if (file_exists(DRUPAL_ROOT . './includes/install.'. $type .'.inc')) {
       include_once DRUPAL_ROOT . '/includes/install.'. $type .'.inc';
       $function = $type .'_is_available';
       if ($function()) {
@@ -270,13 +270,13 @@ function drupal_verify_profile($profile, $locale) {
   include_once DRUPAL_ROOT . '/includes/file.inc';
   include_once DRUPAL_ROOT . '/includes/common.inc';
 
-  $profile_file = "./profiles/$profile/$profile.profile";
+  $profile_file = DRUPAL_ROOT . "/profiles/$profile/$profile.profile";
 
   if (!isset($profile) || !file_exists($profile_file)) {
     install_no_profile_error();
   }
 
-  require_once DRUPAL_ROOT . '/' . $profile_file;
+  require_once $profile_file;
 
   // Get a list of modules required by this profile.
   $function = $profile .'_profile_modules';
@@ -668,13 +668,13 @@ function st($string, $args = array()) {
 function drupal_check_profile($profile) {
   include_once DRUPAL_ROOT . '/includes/file.inc';
 
-  $profile_file = "./profiles/$profile/$profile.profile";
+  $profile_file = DRUPAL_ROOT . "/profiles/$profile/$profile.profile";
 
   if (!isset($profile) || !file_exists($profile_file)) {
     install_no_profile_error();
   }
 
-  require_once DRUPAL_ROOT . '/' . $profile_file;
+  require_once $profile_file;
 
   // Get a list of modules required by this profile.
   $function = $profile .'_profile_modules';

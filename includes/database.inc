@@ -153,10 +153,10 @@ function db_set_active($name = 'default') {
     }
 
     $db_type = substr($connect_url, 0, strpos($connect_url, '://'));
-    $handler = "./includes/database.$db_type.inc";
+    $handler = DRUPAL_ROOT . "/includes/database.$db_type.inc";
 
     if (is_file($handler)) {
-      include_once DRUPAL_ROOT . '/' . $handler;
+      include_once $handler;
     }
     else {
       _db_error_page("The database type '". $db_type ."' is unsupported. Please use either 'mysql' or 'mysqli' for MySQL, or 'pgsql' for PostgreSQL databases.");

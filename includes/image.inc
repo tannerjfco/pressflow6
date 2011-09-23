@@ -62,9 +62,9 @@ function image_get_toolkit() {
 
   if (!$toolkit) {
     $toolkit = variable_get('image_toolkit', 'gd');
-    $toolkit_file = './includes/image.'. $toolkit .'.inc';
+    $toolkit_file = DRUPAL_ROOT . '/includes/image.'. $toolkit .'.inc';
     if (isset($toolkit) && file_exists($toolkit_file)) {
-      include_once DRUPAL_ROOT . '/' . $toolkit_file;
+      include_once $toolkit_file;
     }
     elseif (!image_gd_check_settings()) {
       $toolkit = FALSE;
