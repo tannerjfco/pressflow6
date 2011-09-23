@@ -299,13 +299,13 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       if (isset($info['file']) && !isset($info['path'])) {
         // First, check to see if the fully qualified file exists.
         $filename = './'. $path .'/'. $info['file'];
-        if (file_exists($filename)) {
+        if (file_exists(DRUPAL_ROOT . '/' . $filename)) {
           require_once DRUPAL_ROOT . '/' . $filename;
           $result[$hook]['include files'][] = $filename;
         }
         else {
           $filename = './'. $info['file'];
-          if (file_exists($filename)) {
+          if (file_exists(DRUPAL_ROOT . '/' . $filename)) {
             require_once DRUPAL_ROOT . '/' . $filename;
             $result[$hook]['include files'][] = $filename;
           }
@@ -313,7 +313,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       }
       elseif (isset($info['file']) && isset($info['path'])) {
         $filename = './'. $info['path'] .'/'. $info['file'];
-        if (file_exists($filename)) {
+        if (file_exists(DRUPAL_ROOT . '/' . $filename)) {
           require_once DRUPAL_ROOT . '/' . $filename;
           $result[$hook]['include files'][] = $filename;
         }
@@ -482,7 +482,7 @@ function list_themes($refresh = FALSE) {
     if (db_is_active() && !defined('MAINTENANCE_MODE')) {
       $result = db_query("SELECT * FROM {system} WHERE type = '%s'", 'theme');
       while ($theme = db_fetch_object($result)) {
-        if (file_exists($theme->filename)) {
+        if (file_exists(DRUPAL_ROOT . '/' . $theme->filename)) {
           $theme->info = unserialize($theme->info);
           $themes[] = $theme;
         }
@@ -500,7 +500,7 @@ function list_themes($refresh = FALSE) {
         }
       }
       foreach ($theme->info['scripts'] as $script => $path) {
-        if (file_exists($path)) {
+        if (file_exists(DRUPAL_ROOT . '/' . $path)) {
           $theme->scripts[$script] = $path;
         }
       }
@@ -657,7 +657,7 @@ function theme() {
       // Statically cache files we've already tried to include so we don't
       // run unnecessary file_exists calls.
       $included_files[$include_file] = TRUE;
-      if (file_exists('./'. $include_file)) {
+      if (file_exists(DRUPAL_ROOT . '/' . $include_file)) {
         include_once DRUPAL_ROOT . '/' . $include_file;
       }
     }
@@ -764,8 +764,8 @@ function drupal_discover_template($paths, $suggestions, $extension = '.tpl.php')
     if (!empty($suggestion)) {
       $suggestion = str_replace(array("/", "\\", "\0"), '', $suggestion);
       foreach ($paths as $path) {
-        if (file_exists($file = $path .'/'. $suggestion . $extension)) {
-          return $file;
+        if (file_exists(DRUPAL_ROOT . '/' . $path .'/'. $suggestion . $extension)) {
+          return $path .'/'. $suggestion . $extension;
         }
       }
     }
