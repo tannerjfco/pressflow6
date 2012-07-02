@@ -291,7 +291,8 @@ function drupal_get_destination() {
  * @param $path
  *   A Drupal path or a full URL.
  * @param $query
- *   A query string component, if any.
+ *   A URL-encoded query string to append to the link, or an array of query
+ *   key/value-pairs without any URL-encoding. Passed to url().
  * @param $fragment
  *   A destination fragment identifier (named anchor).
  * @param $http_response_code
@@ -572,8 +573,10 @@ function drupal_http_request($url, $headers = array(), $method = 'GET', $data = 
   }
   fclose($fp);
 
-  // Parse response.
-  list($split, $result->data) = explode("\r\n\r\n", $response, 2);
+  // Parse response headers from the response body.
+  // Be tolerant of malformed HTTP responses that separate header and body with
+  // \n\n or \r\r instead of \r\n\r\n.  See http://drupal.org/node/183435
+  list($split, $result->data) = preg_split("/\r\n\r\n|\n\n|\r\r/", $response, 2);
   $split = preg_split("/\r\n|\n|\r/", $split);
 
   list($protocol, $code, $status_message) = explode(' ', trim(array_shift($split)), 3);
@@ -653,7 +656,7 @@ function drupal_error_handler($errno, $message, $filename, $line, $context) {
     return;
   }
 
-  if ($errno & (E_ALL ^ E_DEPRECATED)) {
+  if ($errno & (E_ALL ^ E_DEPRECATED ^ E_NOTICE)) {
     $types = array(1 => 'error', 2 => 'warning', 4 => 'parse error', 8 => 'notice', 16 => 'core error', 32 => 'core warning', 64 => 'compile error', 128 => 'compile warning', 256 => 'user error', 512 => 'user warning', 1024 => 'user notice', 2048 => 'strict warning', 4096 => 'recoverable fatal error');
 
     // For database errors, we want the line number/file name of the place that
@@ -2539,8 +2542,8 @@ function drupal_to_js($var) {
  *   (optional) If set, the variable will be converted to JSON and output.
  */
 function drupal_json($var = NULL) {
-  // We are returning JavaScript, so tell the browser.
-  drupal_set_header('Content-Type: text/javascript; charset=utf-8');
+  // We are returning JSON, so tell the browser.
+  drupal_set_header('Content-Type: application/json');
 
   if (isset($var)) {
     echo drupal_to_js($var);
@@ -2751,14 +2754,30 @@ function drupal_cron_run() {
   if (function_exists('set_time_limit')) {
     @set_time_limit(240);
   }
-  // Try to acquire cron lock.
-  if (!lock_acquire('cron', 240.0)) {
-    // Cron is still running normally.
-    watchdog('cron', 'Attempting to re-run cron while it is already running.', array(), WATCHDOG_WARNING);
+
+  // Fetch the cron semaphore
+  $semaphore = variable_get('cron_semaphore', FALSE);
+
+  if ($semaphore) {
+    if (time() - $semaphore > 3600) {
+      // Either cron has been running for more than an hour or the semaphore
+      // was not reset due to a database error.
+      watchdog('cron', 'Cron has been running for more than an hour and is most likely stuck.', array(), WATCHDOG_ERROR);
+
+      // Release cron semaphore
+      variable_del('cron_semaphore');
+    }
+    else {
+      // Cron is still running normally.
+      watchdog('cron', 'Attempting to re-run cron while it is already running.', array(), WATCHDOG_WARNING);
+    }
   }
   else {
     // Register shutdown callback
     register_shutdown_function('drupal_cron_cleanup');
+
+    // Lock cron semaphore
+    variable_set('cron_semaphore', time());
 
     // Iterate through the modules calling their cron handlers (if any):
     module_invoke_all('cron');
@@ -2767,8 +2786,8 @@ function drupal_cron_run() {
     variable_set('cron_last', time());
     watchdog('cron', 'Cron run completed.', array(), WATCHDOG_NOTICE);
 
-    // Release cron lock.
-    lock_release('cron');
+    // Release cron semaphore
+    variable_del('cron_semaphore');
 
     // Return TRUE so other functions can check if it did run successfully
     return TRUE;
